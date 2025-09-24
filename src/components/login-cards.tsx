@@ -1,5 +1,12 @@
+import { useState } from "react";
 import { Shield, GraduationCap, BookOpen, Users, BarChart3, Settings, Calendar, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { AdminRegisterForm } from "@/components/auth/AdminRegisterForm";
+import { TeacherRegisterForm } from "@/components/auth/TeacherRegisterForm";
+import { StudentRegisterForm } from "@/components/auth/StudentRegisterForm";
+import { UserRole } from "@/lib/supabase";
 
 const loginPortals = [
   {
@@ -44,6 +51,21 @@ const loginPortals = [
 ];
 
 const LoginCards = () => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogContent, setDialogContent] = useState<'login' | 'register'>('login');
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+
+  const handleRoleAction = (role: UserRole, action: 'login' | 'register') => {
+    setSelectedRole(role);
+    setDialogContent(action);
+    setDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setSelectedRole(null);
+  };
+
   return (
     <section className="py-20 bg-secondary/20">
       <div className="container mx-auto px-4">
@@ -110,13 +132,25 @@ const LoginCards = () => {
                   ))}
                 </div>
 
-                {/* Login Button */}
-                <Button
-                  className={`w-full bg-gradient-to-r ${portal.gradient} hover:scale-105 transition-transform shadow-lg text-white font-semibold`}
-                  size="lg"
-                >
-                  Login as {portal.role}
-                </Button>
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  <Button
+                    className={`w-full bg-gradient-to-r ${portal.gradient} hover:scale-105 transition-transform shadow-lg text-white font-semibold`}
+                    size="lg"
+                    onClick={() => handleRoleAction(portal.role.toLowerCase() as UserRole, 'login')}
+                  >
+                    Login as {portal.role}
+                  </Button>
+                  {portal.role !== 'Admin' && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleRoleAction(portal.role.toLowerCase() as UserRole, 'register')}
+                    >
+                      Register as {portal.role}
+                    </Button>
+                  )}
+                </div>
 
                 {/* Role Badge */}
                 <div className="absolute top-4 right-4">
@@ -138,6 +172,25 @@ const LoginCards = () => {
             Request Access
           </Button>
         </div>
+
+        {/* Auth Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            {selectedRole && (
+              <>
+                {dialogContent === 'login' ? (
+                  <LoginForm role={selectedRole} onClose={closeDialog} />
+                ) : selectedRole === 'admin' ? (
+                  <AdminRegisterForm onClose={closeDialog} />
+                ) : selectedRole === 'teacher' ? (
+                  <TeacherRegisterForm onClose={closeDialog} />
+                ) : (
+                  <StudentRegisterForm onClose={closeDialog} />
+                )}
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
