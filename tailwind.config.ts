@@ -47,6 +47,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -57,6 +61,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-hero': 'var(--gradient-hero)',
+        'gradient-card': 'var(--gradient-card)',
+        'gradient-glassmorphism': 'var(--gradient-glassmorphism)',
+      },
+      backdropBlur: {
+        'glass': '16px',
+      },
+      boxShadow: {
+        'glass': 'var(--glass-shadow)',
+        'glass-inset': 'inset 0 1px 0 0 hsla(0, 0%, 100%, 0.05)',
       },
       borderRadius: {
         lg: "var(--radius)",
