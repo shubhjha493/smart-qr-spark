@@ -130,10 +130,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Error removing demo_role:', error);
     }
     
-    // Then sign out from Supabase
-    await supabase.auth.signOut();
+// Then sign out from Supabase (non-blocking redirect safety)
+try {
+  await supabase.auth.signOut();
+} catch (e) {
+  console.warn('Supabase signOut error (ignored):', e);
+} finally {
+  // Force route change even in demo mode or if guards fail
+  try { window.location.replace('/'); } catch {}
+}
   };
-
   const value = {
     user,
     session,
