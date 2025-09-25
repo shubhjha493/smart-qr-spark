@@ -1,5 +1,11 @@
-import { ArrowRight, Play, Users, Building, Target, Clock } from "lucide-react";
+import { ArrowRight, Play, Users, Building, Target, Clock, Mail, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { z } from "zod";
 
 const stats = [
   {
@@ -28,7 +34,77 @@ const stats = [
   }
 ];
 
+const emailSchema = z.object({
+  email: z.string().trim().email({ message: "Please enter a valid email address" }).max(255, { message: "Email must be less than 255 characters" })
+});
+
 const CtaSection = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { toast } = useToast();
+
+  const playSuccessSound = () => {
+    // Create a simple success sound using Web Audio API
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime + 0.2);
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.log('Audio not supported');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const validatedData = emailSchema.parse({ email });
+      setIsSubmitting(true);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setShowSuccess(true);
+      playSuccessSound();
+      
+      setTimeout(() => {
+        setIsDialogOpen(false);
+        setShowSuccess(false);
+        setEmail("");
+        toast({
+          title: "Demo Scheduled!",
+          description: "We'll get back to you soon with demo details.",
+        });
+      }, 2000);
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Invalid Email",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-gradient-primary relative overflow-hidden">
       {/* Background Elements */}
@@ -79,6 +155,7 @@ const CtaSection = () => {
             <Button
               size="lg"
               className="bg-white text-primary hover:bg-white/90 shadow-2xl hover:scale-105 transition-all duration-300 px-8"
+              onClick={() => setIsDialogOpen(true)}
             >
               Schedule Free Demo
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -125,6 +202,72 @@ const CtaSection = () => {
           </cite>
         </div>
       </div>
+
+      {/* Demo Request Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Mail className="w-6 h-6 text-primary" />
+              Schedule Your Demo
+            </DialogTitle>
+            <DialogDescription>
+              Enter your email and we'll get back to you soon with demo details!
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!showSuccess ? (
+            <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="transition-all duration-200 focus:scale-105"
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300 hover:scale-105"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Scheduling...
+                  </>
+                ) : (
+                  <>
+                    Schedule Demo
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="text-center py-8 animate-scale-in">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-green-600 mb-2">Success!</h3>
+              <p className="text-muted-foreground animate-fade-in">
+                Thank you! We'll get back to you soon with your demo details.
+              </p>
+              <div className="flex justify-center mt-4">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
