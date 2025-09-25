@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { GraduationCap, Eye, EyeOff, Lock, Mail, Phone, MapPin, CreditCard, Calendar, BookOpen } from 'lucide-react';
+import { GraduationCap, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 interface TeacherRegisterFormProps {
   onClose: () => void;
@@ -25,9 +25,6 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
     fullName: '',
     email: '',
     password: '',
-    mobileNumber: '',
-    address: '',
-    dateOfBirth: '',
     gradeLevel: '',
     subjects: [] as string[],
   });
@@ -105,9 +102,6 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
           .insert([
             {
               user_id: session.user.id,
-              mobile_number: formData.mobileNumber,
-              address: formData.address,
-              date_of_birth: formData.dateOfBirth || null,
               grade_level: formData.gradeLevel,
               subjects: formData.subjects,
             }
@@ -195,49 +189,6 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="mobileNumber">Mobile Number</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="mobileNumber"
-                placeholder="Enter mobile number"
-                value={formData.mobileNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, mobileNumber: e.target.value }))}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                className="pl-10"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Textarea
-              id="address"
-              placeholder="Enter address"
-              value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-              className="pl-10 min-h-[60px]"
-            />
-          </div>
-        </div>
 
 
         <div className="space-y-2">

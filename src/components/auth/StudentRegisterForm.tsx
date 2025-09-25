@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { BookOpen, Eye, EyeOff, Lock, Mail, Calendar, CreditCard, Users } from 'lucide-react';
+import { BookOpen, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 interface StudentRegisterFormProps {
   onClose: () => void;
@@ -16,9 +16,6 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
     fullName: '',
     email: '',
     password: '',
-    fatherName: '',
-    motherName: '',
-    dateOfBirth: '',
     class: '',
     rollNumber: '',
     section: '',
@@ -79,9 +76,6 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
           .insert([
             {
               user_id: session.user.id,
-              father_name: formData.fatherName,
-              mother_name: formData.motherName,
-              date_of_birth: formData.dateOfBirth || null,
               class: formData.class,
               roll_number: formData.rollNumber,
               section: formData.section,
@@ -170,44 +164,6 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="fatherName">Father's Name</Label>
-            <Input
-              id="fatherName"
-              placeholder="Enter father's name"
-              value={formData.fatherName}
-              onChange={(e) => setFormData(prev => ({ ...prev, fatherName: e.target.value }))}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="motherName">Mother's Name</Label>
-            <Input
-              id="motherName"
-              placeholder="Enter mother's name"
-              value={formData.motherName}
-              onChange={(e) => setFormData(prev => ({ ...prev, motherName: e.target.value }))}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">Date of Birth</Label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="dateOfBirth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="space-y-2">

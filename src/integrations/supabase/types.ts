@@ -93,10 +93,7 @@ export type Database = {
         Row: {
           class: string | null
           created_at: string
-          date_of_birth: string | null
-          father_name: string | null
           id: string
-          mother_name: string | null
           roll_number: string | null
           section: string | null
           updated_at: string
@@ -105,10 +102,7 @@ export type Database = {
         Insert: {
           class?: string | null
           created_at?: string
-          date_of_birth?: string | null
-          father_name?: string | null
           id?: string
-          mother_name?: string | null
           roll_number?: string | null
           section?: string | null
           updated_at?: string
@@ -117,10 +111,7 @@ export type Database = {
         Update: {
           class?: string | null
           created_at?: string
-          date_of_birth?: string | null
-          father_name?: string | null
           id?: string
-          mother_name?: string | null
           roll_number?: string | null
           section?: string | null
           updated_at?: string
@@ -154,34 +145,25 @@ export type Database = {
       }
       teacher_profiles: {
         Row: {
-          address: string | null
           created_at: string
-          date_of_birth: string | null
           grade_level: string | null
           id: string
-          mobile_number: string | null
           subjects: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          address?: string | null
           created_at?: string
-          date_of_birth?: string | null
           grade_level?: string | null
           id?: string
-          mobile_number?: string | null
           subjects?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          address?: string | null
           created_at?: string
-          date_of_birth?: string | null
           grade_level?: string | null
           id?: string
-          mobile_number?: string | null
           subjects?: string[] | null
           updated_at?: string
           user_id?: string
