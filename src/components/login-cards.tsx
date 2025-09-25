@@ -1,6 +1,6 @@
 import { Shield, GraduationCap, BookOpen, Users, BarChart3, Settings, Calendar, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoginForm from "@/components/auth/LoginForm";
 import AdminRegisterForm from "@/components/auth/AdminRegisterForm";
@@ -130,6 +130,8 @@ const LoginCards = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">
+                    <DialogTitle className="sr-only">{portal.role} Access Portal</DialogTitle>
+                    <DialogDescription className="sr-only">Login or register for {portal.role} access</DialogDescription>
                     <Tabs defaultValue="login" className="w-full">
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="login">Login</TabsTrigger>
