@@ -6,7 +6,7 @@ import LoginForm from "@/components/auth/LoginForm";
 import AdminRegisterForm from "@/components/auth/AdminRegisterForm";
 import TeacherRegisterForm from "@/components/auth/TeacherRegisterForm";
 import StudentRegisterForm from "@/components/auth/StudentRegisterForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const loginPortals = [
   {
@@ -52,6 +52,24 @@ const loginPortals = [
 
 const LoginCards = () => {
   const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const [initialTab, setInitialTab] = useState<'login' | 'register'>('login');
+
+  useEffect(() => {
+    const handleHash = () => {
+      const raw = window.location.hash.replace('#', '');
+      const [rolePart, actionPart] = raw.split('-');
+      const role = rolePart?.toLowerCase();
+      const action = actionPart?.toLowerCase();
+      const roleMap: Record<string, string> = { admin: 'Admin', teacher: 'Teacher', student: 'Student' };
+      if (role && roleMap[role]) {
+        setOpenDialog(roleMap[role]);
+        setInitialTab(action === 'register' ? 'register' : 'login');
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   return (
     <section className="py-20 bg-secondary/20">
@@ -132,7 +150,7 @@ const LoginCards = () => {
                   <DialogContent className="max-w-md">
                     <DialogTitle className="sr-only">{portal.role} Access Portal</DialogTitle>
                     <DialogDescription className="sr-only">Login or register for {portal.role} access</DialogDescription>
-                    <Tabs defaultValue="login" className="w-full">
+                    <Tabs key={initialTab} defaultValue={initialTab} className="w-full">
                       <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="login">Login</TabsTrigger>
                         <TabsTrigger value="register">Register</TabsTrigger>
@@ -170,17 +188,17 @@ const LoginCards = () => {
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
                 <div className="text-red-600 dark:text-red-400 font-semibold mb-2">Admin Access</div>
-                <div className="text-red-700 dark:text-red-300">Email: admin@school.com</div>
+                <div className="text-red-700 dark:text-red-300">Email: admin@demo.com</div>
                 <div className="text-red-700 dark:text-red-300">Password: admin123</div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
                 <div className="text-blue-600 dark:text-blue-400 font-semibold mb-2">Teacher Access</div>
-                <div className="text-blue-700 dark:text-blue-300">Email: teacher@school.com</div>
+                <div className="text-blue-700 dark:text-blue-300">Email: teacher@demo.com</div>
                 <div className="text-blue-700 dark:text-blue-300">Password: teacher123</div>
               </div>
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
                 <div className="text-green-600 dark:text-green-400 font-semibold mb-2">Student Access</div>
-                <div className="text-green-700 dark:text-green-300">Email: student@school.com</div>
+                <div className="text-green-700 dark:text-green-300">Email: student@demo.com</div>
                 <div className="text-green-700 dark:text-green-300">Password: student123</div>
               </div>
             </div>

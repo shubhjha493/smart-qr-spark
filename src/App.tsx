@@ -14,6 +14,11 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) => {
   const { user, userRole, userStatus, loading } = useAuth();
+  const demoRole = typeof window !== 'undefined' ? localStorage.getItem('demo_role') : null;
+  
+  if (demoRole && allowedRoles.includes(demoRole)) {
+    return <>{children}</>;
+  }
   
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/" replace />;
@@ -25,6 +30,14 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
 
 const AppRoutes = () => {
   const { user, userRole, userStatus } = useAuth();
+  const demoRole = typeof window !== 'undefined' ? localStorage.getItem('demo_role') : null;
+  
+  // Redirect demo users to their dashboard
+  if (demoRole) {
+    if (demoRole === 'admin') return <Navigate to="/admin" replace />;
+    if (demoRole === 'teacher') return <Navigate to="/teacher" replace />;
+    if (demoRole === 'student') return <Navigate to="/student" replace />;
+  }
   
   // Redirect authenticated users to their dashboard
   if (user && userStatus === 'approved' && userRole) {

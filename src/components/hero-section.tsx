@@ -36,12 +36,14 @@ const HeroSection = () => {
             </div>
             
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="bg-gradient-primary hover:scale-105 transition-transform shadow-glass">
-                Schedule Free Demo
-                <Play className="w-5 h-5 ml-2" />
+              <Button size="lg" className="bg-gradient-primary hover:scale-105 transition-transform shadow-glass" onClick={() => (window.location.hash = '#admin-login')}>
+                Admin Login
               </Button>
-              <Button variant="outline" size="lg" className="backdrop-blur-glass bg-gradient-glassmorphism border-white/20 hover:bg-white/10">
-                Watch Demo
+              <Button variant="outline" size="lg" className="backdrop-blur-glass bg-gradient-glassmorphism border-white/20 hover:bg-white/10" onClick={() => (window.location.hash = '#teacher-login')}>
+                Teacher Login/Register
+              </Button>
+              <Button variant="outline" size="lg" className="backdrop-blur-glass bg-gradient-glassmorphism border-white/20 hover:bg-white/10" onClick={() => (window.location.hash = '#student-login')}>
+                Student Login/Register
               </Button>
             </div>
             

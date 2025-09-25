@@ -120,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
     setUserRole(null);
     setUserStatus(null);
+    try { localStorage.removeItem('demo_role'); } catch {}
   };
 
   const value = {

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginFormProps {
   role: 'admin' | 'teacher' | 'student';
@@ -18,6 +19,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ role, onClose }) => {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const getRoleColor = () => {
     switch (role) {
@@ -36,6 +38,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ role, onClose }) => {
         description: "Please fill in all fields",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Handle demo credentials (frontend-only)
+    const demos = {
+      admin: { email: 'admin@demo.com', password: 'admin123', path: '/admin' },
+      teacher: { email: 'teacher@demo.com', password: 'teacher123', path: '/teacher' },
+      student: { email: 'student@demo.com', password: 'student123', path: '/student' },
+    } as const;
+
+    const match = demos[role];
+    if (email.trim().toLowerCase() === match.email && password === match.password) {
+      try { localStorage.setItem('demo_role', role); } catch {}
+      toast({ title: "Demo Login", description: `Logged in as ${role}.` });
+      onClose();
+      navigate(match.path);
       return;
     }
 
