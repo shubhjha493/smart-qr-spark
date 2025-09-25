@@ -164,7 +164,27 @@ const LoginCards = () => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 space-y-6">
+          <div className="bg-gradient-glassmorphism backdrop-blur-glass border border-white/20 rounded-2xl p-6 max-w-4xl mx-auto">
+            <h3 className="text-xl font-bold mb-4 text-foreground">Demo Login Credentials</h3>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+                <div className="text-red-600 dark:text-red-400 font-semibold mb-2">Admin Access</div>
+                <div className="text-red-700 dark:text-red-300">Email: admin@school.com</div>
+                <div className="text-red-700 dark:text-red-300">Password: admin123</div>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <div className="text-blue-600 dark:text-blue-400 font-semibold mb-2">Teacher Access</div>
+                <div className="text-blue-700 dark:text-blue-300">Email: teacher@school.com</div>
+                <div className="text-blue-700 dark:text-blue-300">Password: teacher123</div>
+              </div>
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+                <div className="text-green-600 dark:text-green-400 font-semibold mb-2">Student Access</div>
+                <div className="text-green-700 dark:text-green-300">Email: student@school.com</div>
+                <div className="text-green-700 dark:text-green-300">Password: student123</div>
+              </div>
+            </div>
+          </div>
           <p className="text-muted-foreground mb-4">
             Don't have an account? Contact your institution administrator.
           </p>
