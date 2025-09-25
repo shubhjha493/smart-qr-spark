@@ -27,94 +27,40 @@ const AdminDashboard = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [classMode, setClassMode] = useState<'online' | 'offline'>('offline');
-  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [pendingRequests] = useState([
+    { id: 1, role: 'teacher', profiles: { full_name: 'John Smith', email: 'john@school.com' }, teacher_profiles: { grade_level: 'Secondary', subjects: ['Math', 'Physics'] } },
+    { id: 2, role: 'student', profiles: { full_name: 'Sarah Johnson', email: 'sarah@student.com' }, student_profiles: { class: '10', roll_number: '25', section: 'A' } },
+    { id: 3, role: 'teacher', profiles: { full_name: 'Emily Davis', email: 'emily@school.com' }, teacher_profiles: { grade_level: 'Primary', subjects: ['English', 'Science'] } }
+  ]);
   const [noticeTitle, setNoticeTitle] = useState('');
   const [noticeContent, setNoticeContent] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Dummy data - no API calls needed
   useEffect(() => {
-    fetchPendingRequests();
-    fetchSystemSettings();
+    // Set demo mode indicator
   }, []);
 
-  const fetchSystemSettings = async () => {
-    const { data, error } = await supabase
-      .from('system_settings')
-      .select('setting_value')
-      .eq('setting_key', 'class_mode')
-      .single();
-    
-    if (data) {
-      setClassMode(data.setting_value as 'online' | 'offline');
-    }
-  };
-
-  const fetchPendingRequests = async () => {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select(`
-        *,
-        profiles(full_name, email),
-        teacher_profiles(mobile_number, grade_level, subjects),
-        student_profiles(class, roll_number, section)
-      `)
-      .eq('status', 'pending');
-
-    if (data) {
-      setPendingRequests(data);
-    }
-  };
-
-  const handleModeToggle = async (online: boolean) => {
+  const handleModeToggle = (online: boolean) => {
     const newMode = online ? 'online' : 'offline';
     setClassMode(newMode);
     
-    const { error } = await supabase
-      .from('system_settings')
-      .upsert({ 
-        setting_key: 'class_mode', 
-        setting_value: newMode,
-        updated_by: user?.id 
-      });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update class mode",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: `Class mode switched to ${newMode}`,
-      });
-    }
+    toast({
+      title: "Success",
+      description: `Class mode switched to ${newMode}`,
+    });
   };
 
-  const handleApproval = async (userId: string, approved: boolean) => {
+  const handleApproval = (requestId: number, approved: boolean) => {
     const status = approved ? 'approved' : 'rejected';
     
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ status })
-      .eq('user_id', userId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update request status",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: `Request ${status} successfully`,
-      });
-      fetchPendingRequests();
-    }
+    toast({
+      title: "Success",
+      description: `Request ${status} successfully`,
+    });
   };
 
-  const publishNotice = async () => {
+  const publishNotice = () => {
     if (!noticeTitle || !noticeContent) {
       toast({
         title: "Error",
@@ -125,31 +71,17 @@ const AdminDashboard = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase
-      .from('notices')
-      .insert([
-        {
-          title: noticeTitle,
-          content: noticeContent,
-          created_by: user?.id,
-        }
-      ]);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to publish notice",
-        variant: "destructive",
-      });
-    } else {
+    
+    // Simulate publishing
+    setTimeout(() => {
       toast({
         title: "Success",
         description: "Notice published successfully",
       });
       setNoticeTitle('');
       setNoticeContent('');
-    }
-    setLoading(false);
+      setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -425,14 +357,14 @@ const AdminDashboard = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleApproval(request.user_id, false)}
+                        onClick={() => handleApproval(request.id, false)}
                         className="text-red-600 border-red-200 hover:bg-red-50"
                       >
                         Reject
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => handleApproval(request.user_id, true)}
+                        onClick={() => handleApproval(request.id, true)}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         Approve

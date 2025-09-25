@@ -28,35 +28,30 @@ const StudentDashboard = () => {
   const [studentProfile, setStudentProfile] = useState<any>(null);
 
   useEffect(() => {
-    fetchNotices();
-    fetchStudentProfile();
+    // Set dummy data
+    setNotices(dummyNotices);
+    setStudentProfile(dummyProfile);
   }, []);
 
-  const fetchNotices = async () => {
-    const { data, error } = await supabase
-      .from('notices')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
+  // Dummy data for demo
+  const dummyNotices = [
+    { id: 1, title: "Extra class tomorrow at 3 PM", content: "Additional Physics class scheduled", created_at: new Date().toISOString() },
+    { id: 2, title: "Fee payment reminder", content: "Exam fees due by Oct 15th", created_at: new Date().toISOString() },
+    { id: 3, title: "Holiday announcement", content: "School closed for Diwali on Oct 12th", created_at: new Date().toISOString() }
+  ];
 
-    if (data) {
-      setNotices(data);
-    }
+  const dummyProfile = {
+    full_name: "Alex Johnson",
+    class: "10",
+    roll_number: "25",
+    section: "A"
   };
 
-  const fetchStudentProfile = async () => {
-    if (!user) return;
-    
-    const { data, error } = await supabase
-      .from('student_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (data) {
-      setStudentProfile(data);
-    }
-  };
+  useEffect(() => {
+    // Set dummy data
+    setNotices(dummyNotices);
+    setStudentProfile(dummyProfile);
+  }, []);
 
   const applyForLeave = () => {
     toast({

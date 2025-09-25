@@ -27,35 +27,30 @@ const TeacherDashboard = () => {
   const [teacherProfile, setTeacherProfile] = useState<any>(null);
 
   useEffect(() => {
-    fetchNotices();
-    fetchTeacherProfile();
+    // Set dummy data
+    setNotices(dummyNotices);
+    setTeacherProfile(dummyProfile);
   }, []);
 
-  const fetchNotices = async () => {
-    const { data, error } = await supabase
-      .from('notices')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
+  // Dummy data for demo
+  const dummyNotices = [
+    { id: 1, title: "Admin published exam schedule", content: "Mid-term exams start from Oct 15th", created_at: new Date().toISOString() },
+    { id: 2, title: "Extra class tomorrow at 3 PM", content: "Additional Physics class scheduled", created_at: new Date().toISOString() },
+    { id: 3, title: "Holiday on Friday", content: "School closed for Diwali celebration", created_at: new Date().toISOString() }
+  ];
 
-    if (data) {
-      setNotices(data);
-    }
+  const dummyProfile = {
+    full_name: "Dr. Johnson Smith",
+    grade_level: "Secondary",
+    subjects: ["Mathematics", "Physics"],
+    leave_balance: 15
   };
 
-  const fetchTeacherProfile = async () => {
-    if (!user) return;
-    
-    const { data, error } = await supabase
-      .from('teacher_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (data) {
-      setTeacherProfile(data);
-    }
-  };
+  useEffect(() => {
+    // Set dummy data
+    setNotices(dummyNotices);
+    setTeacherProfile(dummyProfile);
+  }, []);
 
   const markAttendance = () => {
     toast({
