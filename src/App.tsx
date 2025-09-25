@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -31,17 +31,18 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
 
 const AppRoutes = () => {
   const { user, userRole, userStatus } = useAuth();
+  const location = useLocation();
   const demoRole = typeof window !== 'undefined' ? localStorage.getItem('demo_role') : null;
   
-  // Redirect demo users to their dashboard
-  if (demoRole) {
+  // Redirect demo users to their dashboard only from home
+  if (demoRole && location.pathname === '/') {
     if (demoRole === 'admin') return <Navigate to="/admin" replace />;
     if (demoRole === 'teacher') return <Navigate to="/teacher" replace />;
     if (demoRole === 'student') return <Navigate to="/student" replace />;
   }
   
-  // Redirect authenticated users to their dashboard
-  if (user && userStatus === 'approved' && userRole) {
+  // Redirect authenticated users to their dashboard only from home
+  if (user && userStatus === 'approved' && userRole && location.pathname === '/') {
     if (userRole === 'admin') return <Navigate to="/admin" replace />;
     if (userRole === 'teacher') return <Navigate to="/teacher" replace />;
     if (userRole === 'student') return <Navigate to="/student" replace />;
