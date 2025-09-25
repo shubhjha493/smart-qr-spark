@@ -117,10 +117,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Clear user state first to prevent redirects
+    setUser(null);
+    setSession(null);
     setUserRole(null);
     setUserStatus(null);
-    try { localStorage.removeItem('demo_role'); } catch {}
+    
+    // Clear demo role from localStorage
+    try { 
+      localStorage.removeItem('demo_role'); 
+    } catch (error) {
+      console.log('Error removing demo_role:', error);
+    }
+    
+    // Then sign out from Supabase
+    await supabase.auth.signOut();
   };
 
   const value = {

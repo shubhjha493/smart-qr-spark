@@ -16,7 +16,8 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
   const { user, userRole, userStatus, loading } = useAuth();
   const demoRole = typeof window !== 'undefined' ? localStorage.getItem('demo_role') : null;
   
-  if (demoRole && allowedRoles.includes(demoRole)) {
+  // Only allow demo access if user is not explicitly signed out
+  if (demoRole && allowedRoles.includes(demoRole) && user !== null) {
     return <>{children}</>;
   }
   
@@ -32,8 +33,8 @@ const AppRoutes = () => {
   const { user, userRole, userStatus } = useAuth();
   const demoRole = typeof window !== 'undefined' ? localStorage.getItem('demo_role') : null;
   
-  // Redirect demo users to their dashboard
-  if (demoRole) {
+  // Only redirect demo users if they are not currently signing out (user is not null or user is null but demo session exists)
+  if (demoRole && user !== null) {
     if (demoRole === 'admin') return <Navigate to="/admin" replace />;
     if (demoRole === 'teacher') return <Navigate to="/teacher" replace />;
     if (demoRole === 'student') return <Navigate to="/student" replace />;
