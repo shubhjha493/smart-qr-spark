@@ -184,24 +184,16 @@ const LoginCards = () => {
         {/* Bottom CTA */}
         <div className="text-center mt-12 space-y-6">
           <div className="bg-gradient-glassmorphism backdrop-blur-glass border border-white/20 rounded-2xl p-6 max-w-4xl mx-auto">
-            <h3 className="text-xl font-bold mb-4 text-foreground">Demo Login Credentials</h3>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-                <div className="text-red-600 dark:text-red-400 font-semibold mb-2">Admin Access</div>
-                <div className="text-red-700 dark:text-red-300">Email: admin@demo.com</div>
-                <div className="text-red-700 dark:text-red-300">Password: admin123</div>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                <div className="text-blue-600 dark:text-blue-400 font-semibold mb-2">Teacher Access</div>
-                <div className="text-blue-700 dark:text-blue-300">Email: teacher@demo.com</div>
-                <div className="text-blue-700 dark:text-blue-300">Password: teacher123</div>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-                <div className="text-green-600 dark:text-green-400 font-semibold mb-2">Student Access</div>
-                <div className="text-green-700 dark:text-green-300">Email: student@demo.com</div>
-                <div className="text-green-700 dark:text-green-300">Password: student123</div>
-              </div>
-            </div>
+            <h3 className="text-xl font-bold mb-4 text-foreground">SmartPresence Demo</h3>
+            <p className="text-muted-foreground mb-4">
+              Watch our demo video to see how SmartPresence transforms attendance management.
+            </p>
+            <Button 
+              onClick={() => window.open('https://youtu.be/4-xrig8Z-no?si=WbUyQTy-hYSZ00hC', '_blank')}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:scale-105 transition-transform text-white font-semibold"
+            >
+              Watch Demo Video
+            </Button>
           </div>
           <p className="text-muted-foreground mb-4">
             Don't have an account? Contact your institution administrator.

@@ -28,7 +28,7 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fullName || !formData.email || !formData.password) {
+    if (!formData.fullName || !formData.email || !formData.password || !formData.class || !formData.rollNumber || !formData.section) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -39,66 +39,15 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
 
     setLoading(true);
 
-    try {
-      // Sign up the user
-      const { error: signUpError } = await signUp(formData.email, formData.password, {
-        full_name: formData.fullName,
-      });
-
-      if (signUpError) {
-        toast({
-          title: "Registration Failed",
-          description: signUpError.message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Get the user session to get the user ID
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        // Create user role entry
-        await supabase
-          .from('user_roles')
-          .insert([
-            {
-              user_id: session.user.id,
-              role: 'student',
-              status: 'pending'
-            }
-          ]);
-
-        // Create student profile
-        await supabase
-          .from('student_profiles')
-          .insert([
-            {
-              user_id: session.user.id,
-              class: formData.class,
-              roll_number: formData.rollNumber,
-              section: formData.section,
-            }
-          ]);
-      }
-
+    // Simulate processing delay
+    setTimeout(() => {
       toast({
         title: "Registration Submitted",
-        description: "Please wait for Admin approval. You'll receive an email confirmation.",
+        description: "Your student registration has been submitted. Please wait for admin approval.",
       });
-      
+      setLoading(false);
       onClose();
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -125,13 +74,13 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email ID *</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter email"
+                placeholder="Enter email ID"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 className="pl-10"
@@ -167,32 +116,42 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="class">Class</Label>
-            <Input
+            <Label htmlFor="class">Class *</Label>
+            <select
               id="class"
-              placeholder="e.g., 10th"
               value={formData.class}
               onChange={(e) => setFormData(prev => ({ ...prev, class: e.target.value }))}
-            />
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              required
+            >
+              <option value="">Select class</option>
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={`${i + 1}`}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rollNumber">Roll Number</Label>
+            <Label htmlFor="rollNumber">Roll Number *</Label>
             <Input
               id="rollNumber"
               placeholder="Enter roll number"
               value={formData.rollNumber}
               onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="section">Section</Label>
+            <Label htmlFor="section">Section *</Label>
             <Input
               id="section"
               placeholder="e.g., A"
               value={formData.section}
               onChange={(e) => setFormData(prev => ({ ...prev, section: e.target.value }))}
+              required
             />
           </div>
         </div>

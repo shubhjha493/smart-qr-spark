@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { Shield, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 
 interface AdminRegisterFormProps {
@@ -19,7 +17,6 @@ const AdminRegisterForm: React.FC<AdminRegisterFormProps> = ({ onClose }) => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,63 +33,15 @@ const AdminRegisterForm: React.FC<AdminRegisterFormProps> = ({ onClose }) => {
 
     setLoading(true);
 
-    try {
-      // Sign up the user
-      const { error: signUpError } = await signUp(formData.email, formData.password, {
-        full_name: formData.fullName,
-      });
-
-      if (signUpError) {
-        toast({
-          title: "Registration Failed",
-          description: signUpError.message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Get the user session to get the user ID
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        // Create user role entry - admin is auto-approved
-        await supabase
-          .from('user_roles')
-          .insert([
-            {
-              user_id: session.user.id,
-              role: 'admin',
-              status: 'approved'
-            }
-          ]);
-
-        // Create admin profile
-        await supabase
-          .from('admin_profiles')
-          .insert([
-            {
-              user_id: session.user.id,
-            }
-          ]);
-      }
-
+    // Simulate processing delay
+    setTimeout(() => {
       toast({
-        title: "Admin Registration Complete",
-        description: "Welcome! You can now access the admin dashboard.",
+        title: "Registration Submitted",
+        description: "Your admin registration has been submitted. Please wait for admin approval.",
       });
-      
+      setLoading(false);
       onClose();
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -118,13 +67,13 @@ const AdminRegisterForm: React.FC<AdminRegisterFormProps> = ({ onClose }) => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email">Email ID *</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               id="email"
               type="email"
-              placeholder="Enter email"
+              placeholder="Enter email ID"
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               className="pl-10"
@@ -161,7 +110,7 @@ const AdminRegisterForm: React.FC<AdminRegisterFormProps> = ({ onClose }) => {
           className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:scale-105 transition-transform text-white font-semibold"
           disabled={loading}
         >
-          {loading ? 'Creating Account...' : 'Create Admin Account'}
+          {loading ? 'Submitting...' : 'Submit Registration'}
         </Button>
       </form>
     </div>

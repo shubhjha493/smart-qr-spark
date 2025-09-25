@@ -25,6 +25,7 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
     fullName: '',
     email: '',
     password: '',
+    mobile: '',
     gradeLevel: '',
     subjects: [] as string[],
   });
@@ -45,7 +46,7 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fullName || !formData.email || !formData.password) {
+    if (!formData.fullName || !formData.email || !formData.password || !formData.mobile || !formData.gradeLevel) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -65,65 +66,15 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
 
     setLoading(true);
 
-    try {
-      // Sign up the user
-      const { error: signUpError } = await signUp(formData.email, formData.password, {
-        full_name: formData.fullName,
-      });
-
-      if (signUpError) {
-        toast({
-          title: "Registration Failed",
-          description: signUpError.message,
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Get the user session to get the user ID
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        // Create user role entry
-        await supabase
-          .from('user_roles')
-          .insert([
-            {
-              user_id: session.user.id,
-              role: 'teacher',
-              status: 'pending'
-            }
-          ]);
-
-        // Create teacher profile
-        await supabase
-          .from('teacher_profiles')
-          .insert([
-            {
-              user_id: session.user.id,
-              grade_level: formData.gradeLevel,
-              subjects: formData.subjects,
-            }
-          ]);
-      }
-
+    // Simulate processing delay
+    setTimeout(() => {
       toast({
         title: "Registration Submitted",
-        description: "Please wait for Admin approval. You'll receive an email confirmation.",
+        description: "Your teacher registration has been submitted. Please wait for admin approval.",
       });
-      
+      setLoading(false);
       onClose();
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -150,13 +101,13 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email ID *</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter email"
+                placeholder="Enter email ID"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 className="pl-10"
@@ -189,10 +140,20 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
           </div>
         </div>
 
-
+        <div className="space-y-2">
+          <Label htmlFor="mobile">Mobile Number *</Label>
+          <Input
+            id="mobile"
+            type="tel"
+            placeholder="Enter mobile number"
+            value={formData.mobile}
+            onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+            required
+          />
+        </div>
 
         <div className="space-y-2">
-          <Label htmlFor="gradeLevel">Teacher of Grade</Label>
+          <Label htmlFor="gradeLevel">Grade / Level *</Label>
           <Select value={formData.gradeLevel} onValueChange={(value) => setFormData(prev => ({ ...prev, gradeLevel: value }))}>
             <SelectTrigger>
               <SelectValue placeholder="Select grade level" />
