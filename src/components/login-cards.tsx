@@ -1,5 +1,12 @@
 import { Shield, GraduationCap, BookOpen, Users, BarChart3, Settings, Calendar, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LoginForm from "@/components/auth/LoginForm";
+import AdminRegisterForm from "@/components/auth/AdminRegisterForm";
+import TeacherRegisterForm from "@/components/auth/TeacherRegisterForm";
+import StudentRegisterForm from "@/components/auth/StudentRegisterForm";
+import { useState } from "react";
 
 const loginPortals = [
   {
@@ -44,6 +51,8 @@ const loginPortals = [
 ];
 
 const LoginCards = () => {
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
+
   return (
     <section className="py-20 bg-secondary/20">
       <div className="container mx-auto px-4">
@@ -111,12 +120,35 @@ const LoginCards = () => {
                 </div>
 
                 {/* Login Button */}
-                <Button
-                  className={`w-full bg-gradient-to-r ${portal.gradient} hover:scale-105 transition-transform shadow-lg text-white font-semibold`}
-                  size="lg"
-                >
-                  Login as {portal.role}
-                </Button>
+                <Dialog open={openDialog === portal.role} onOpenChange={(open) => setOpenDialog(open ? portal.role : null)}>
+                  <DialogTrigger asChild>
+                    <Button
+                      className={`w-full bg-gradient-to-r ${portal.gradient} hover:scale-105 transition-transform shadow-lg text-white font-semibold`}
+                      size="lg"
+                    >
+                      Login as {portal.role}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <Tabs defaultValue="login" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="login">Login</TabsTrigger>
+                        <TabsTrigger value="register">Register</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="login">
+                        <LoginForm 
+                          role={portal.role as 'admin' | 'teacher' | 'student'} 
+                          onClose={() => setOpenDialog(null)} 
+                        />
+                      </TabsContent>
+                      <TabsContent value="register">
+                        {portal.role === 'admin' && <AdminRegisterForm onClose={() => setOpenDialog(null)} />}
+                        {portal.role === 'teacher' && <TeacherRegisterForm onClose={() => setOpenDialog(null)} />}
+                        {portal.role === 'student' && <StudentRegisterForm onClose={() => setOpenDialog(null)} />}
+                      </TabsContent>
+                    </Tabs>
+                  </DialogContent>
+                </Dialog>
 
                 {/* Role Badge */}
                 <div className="absolute top-4 right-4">

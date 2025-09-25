@@ -1,0 +1,271 @@
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { BookOpen, Eye, EyeOff, Lock, Mail, Calendar, CreditCard, Users } from 'lucide-react';
+
+interface StudentRegisterFormProps {
+  onClose: () => void;
+}
+
+const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    fatherName: '',
+    motherName: '',
+    dateOfBirth: '',
+    aadharNumber: '',
+    class: '',
+    rollNumber: '',
+    section: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.fullName || !formData.email || !formData.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Sign up the user
+      const { error: signUpError } = await signUp(formData.email, formData.password, {
+        full_name: formData.fullName,
+      });
+
+      if (signUpError) {
+        toast({
+          title: "Registration Failed",
+          description: signUpError.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Get the user session to get the user ID
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        // Create user role entry
+        await supabase
+          .from('user_roles')
+          .insert([
+            {
+              user_id: session.user.id,
+              role: 'student',
+              status: 'pending'
+            }
+          ]);
+
+        // Create student profile
+        await supabase
+          .from('student_profiles')
+          .insert([
+            {
+              user_id: session.user.id,
+              father_name: formData.fatherName,
+              mother_name: formData.motherName,
+              date_of_birth: formData.dateOfBirth || null,
+              aadhar_number: formData.aadharNumber,
+              class: formData.class,
+              roll_number: formData.rollNumber,
+              section: formData.section,
+            }
+          ]);
+      }
+
+      toast({
+        title: "Registration Submitted",
+        description: "Please wait for Admin approval. You'll receive an email confirmation.",
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+      <div className="text-center">
+        <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
+          <BookOpen className="w-8 h-8 text-white" />
+        </div>
+        <h2 className="text-2xl font-bold">Student Registration</h2>
+        <p className="text-muted-foreground">Create your student account</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="fullName">Full Name *</Label>
+            <Input
+              id="fullName"
+              placeholder="Enter full name"
+              value={formData.fullName}
+              onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email *</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Password *</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Create password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              className="pl-10 pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="fatherName">Father's Name</Label>
+            <Input
+              id="fatherName"
+              placeholder="Enter father's name"
+              value={formData.fatherName}
+              onChange={(e) => setFormData(prev => ({ ...prev, fatherName: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="motherName">Mother's Name</Label>
+            <Input
+              id="motherName"
+              placeholder="Enter mother's name"
+              value={formData.motherName}
+              onChange={(e) => setFormData(prev => ({ ...prev, motherName: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="dateOfBirth"
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="aadharNumber">Aadhar Number</Label>
+            <div className="relative">
+              <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="aadharNumber"
+                placeholder="Enter Aadhar number"
+                value={formData.aadharNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, aadharNumber: e.target.value }))}
+                className="pl-10"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="class">Class</Label>
+            <Input
+              id="class"
+              placeholder="e.g., 10th"
+              value={formData.class}
+              onChange={(e) => setFormData(prev => ({ ...prev, class: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="rollNumber">Roll Number</Label>
+            <Input
+              id="rollNumber"
+              placeholder="Enter roll number"
+              value={formData.rollNumber}
+              onChange={(e) => setFormData(prev => ({ ...prev, rollNumber: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="section">Section</Label>
+            <Input
+              id="section"
+              placeholder="e.g., A"
+              value={formData.section}
+              onChange={(e) => setFormData(prev => ({ ...prev, section: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:scale-105 transition-transform text-white font-semibold"
+          disabled={loading}
+        >
+          {loading ? 'Submitting...' : 'Submit Registration'}
+        </Button>
+      </form>
+    </div>
+  );
+};
+
+export default StudentRegisterForm;
