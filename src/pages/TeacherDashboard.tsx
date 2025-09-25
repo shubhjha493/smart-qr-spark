@@ -148,23 +148,23 @@ const TeacherDashboard = () => {
         </div>
 
         {/* Main Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={markAttendance}>
             <CardHeader className="text-center">
               <QrCode className="w-12 h-12 mx-auto text-blue-500 mb-2" />
-              <CardTitle>Mark Attendance</CardTitle>
+              <CardTitle>QR Attendance</CardTitle>
               <CardDescription>
-                Use QR scanning or manual entry to mark student attendance
+                Scan QR code to mark attendance quickly
               </CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => toast({ title: "Student Reports", description: "Detailed attendance analytics coming soon!" })}>
             <CardHeader className="text-center">
               <BarChart3 className="w-12 h-12 mx-auto text-green-500 mb-2" />
-              <CardTitle>Attendance Reports</CardTitle>
+              <CardTitle>Student Reports</CardTitle>
               <CardDescription>
-                View detailed attendance analytics and reports
+                Daily, weekly, and monthly attendance reports
               </CardDescription>
             </CardHeader>
           </Card>
@@ -175,6 +175,16 @@ const TeacherDashboard = () => {
               <CardTitle>Request Leave</CardTitle>
               <CardDescription>
                 Submit leave requests for approval
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => toast({ title: "Class Management", description: "Advanced class management tools coming soon!" })}>
+            <CardHeader className="text-center">
+              <Users className="w-12 h-12 mx-auto text-purple-500 mb-2" />
+              <CardTitle>Class Management</CardTitle>
+              <CardDescription>
+                Manage your classes and student groups
               </CardDescription>
             </CardHeader>
           </Card>
@@ -259,30 +269,76 @@ const TeacherDashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle>Your Teaching Profile</CardTitle>
-              <CardDescription>Your assigned subjects and grade level</CardDescription>
+              <CardDescription>Your assigned subjects and performance metrics</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-sm font-medium">Grade Level</Label>
                   <Badge variant="outline" className="mt-1">
                     {teacherProfile.grade_level}
                   </Badge>
                 </div>
-                <div className="md:col-span-2">
-                  <Label className="text-sm font-medium">Subjects</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {teacherProfile.subjects?.map((subject: string, index: number) => (
-                      <Badge key={index} variant="secondary">
-                        {subject}
-                      </Badge>
-                    ))}
-                  </div>
+                <div>
+                  <Label className="text-sm font-medium">Classes Today</Label>
+                  <Badge variant="outline" className="mt-1">
+                    {todaysClasses.length}
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Attendance Rate</Label>
+                  <Badge variant="outline" className="mt-1 text-green-600">
+                    92%
+                  </Badge>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Leave Balance</Label>
+                  <Badge variant="outline" className="mt-1">
+                    12 days
+                  </Badge>
+                </div>
+              </div>
+              <div className="mt-4">
+                <Label className="text-sm font-medium">Subjects</Label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {teacherProfile.subjects?.map((subject: string, index: number) => (
+                    <Badge key={index} variant="secondary">
+                      {subject}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
+
+        {/* Quick Statistics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>This Week Overview</CardTitle>
+            <CardDescription>Your teaching statistics for the current week</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">18</div>
+                <div className="text-sm text-blue-600">Classes Taught</div>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">156</div>
+                <div className="text-sm text-green-600">Students Present</div>
+              </div>
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="text-2xl font-bold text-orange-600">12</div>
+                <div className="text-sm text-orange-600">Assignments Given</div>
+              </div>
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">94%</div>
+                <div className="text-sm text-purple-600">Avg Attendance</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

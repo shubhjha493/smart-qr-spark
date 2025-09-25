@@ -91,7 +91,6 @@ export type Database = {
       }
       student_profiles: {
         Row: {
-          aadhar_number: string | null
           class: string | null
           created_at: string
           date_of_birth: string | null
@@ -104,7 +103,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          aadhar_number?: string | null
           class?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -117,7 +115,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          aadhar_number?: string | null
           class?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -157,7 +154,6 @@ export type Database = {
       }
       teacher_profiles: {
         Row: {
-          aadhar_number: string | null
           address: string | null
           created_at: string
           date_of_birth: string | null
@@ -169,7 +165,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          aadhar_number?: string | null
           address?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -181,7 +176,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          aadhar_number?: string | null
           address?: string | null
           created_at?: string
           date_of_birth?: string | null

@@ -167,13 +167,13 @@ const StudentDashboard = () => {
         </div>
 
         {/* Main Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={applyForLeave}>
             <CardHeader className="text-center">
               <FileText className="w-12 h-12 mx-auto text-blue-500 mb-2" />
               <CardTitle>Apply for Leave</CardTitle>
               <CardDescription>
-                Submit leave applications for approval
+                Submit leave applications quickly
               </CardDescription>
             </CardHeader>
           </Card>
@@ -183,7 +183,7 @@ const StudentDashboard = () => {
               <AlertCircle className="w-12 h-12 mx-auto text-orange-500 mb-2" />
               <CardTitle>Register Complaint</CardTitle>
               <CardDescription>
-                Report issues or concerns to administration
+                Report issues or concerns
               </CardDescription>
             </CardHeader>
           </Card>
@@ -193,7 +193,17 @@ const StudentDashboard = () => {
               <CreditCard className="w-12 h-12 mx-auto text-green-500 mb-2" />
               <CardTitle>Pay Fees Online</CardTitle>
               <CardDescription>
-                Make secure online fee payments
+                Secure online fee payments
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => toast({ title: "Academic Progress", description: "Detailed academic reports coming soon!" })}>
+            <CardHeader className="text-center">
+              <PieChart className="w-12 h-12 mx-auto text-purple-500 mb-2" />
+              <CardTitle>Academic Progress</CardTitle>
+              <CardDescription>
+                View grades and performance
               </CardDescription>
             </CardHeader>
           </Card>
@@ -310,37 +320,128 @@ const StudentDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Student Profile Info */}
-        {studentProfile && (
+        {/* Student Profile Info & Academic Performance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {studentProfile && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Profile</CardTitle>
+                <CardDescription>Student information and academic details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Class</Label>
+                    <Badge variant="outline" className="mt-1">
+                      {studentProfile.class}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Roll Number</Label>
+                    <Badge variant="outline" className="mt-1">
+                      {studentProfile.roll_number}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Section</Label>
+                    <Badge variant="outline" className="mt-1">
+                      {studentProfile.section}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
-              <CardTitle>Your Profile</CardTitle>
-              <CardDescription>Student information and class details</CardDescription>
+              <CardTitle>Academic Performance</CardTitle>
+              <CardDescription>Your current semester overview</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-sm font-medium">Class</Label>
-                  <Badge variant="outline" className="mt-1">
-                    {studentProfile.class}
-                  </Badge>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">A-</div>
+                  <div className="text-sm text-green-600">Overall Grade</div>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium">Roll Number</Label>
-                  <Badge variant="outline" className="mt-1">
-                    {studentProfile.roll_number}
-                  </Badge>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">7th</div>
+                  <div className="text-sm text-blue-600">Class Rank</div>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium">Section</Label>
-                  <Badge variant="outline" className="mt-1">
-                    {studentProfile.section}
-                  </Badge>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">86%</div>
+                  <div className="text-sm text-purple-600">Test Average</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">12</div>
+                  <div className="text-sm text-orange-600">Assignments</div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
+
+        {/* Fee Status & Important Dates */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Fee Status</CardTitle>
+              <CardDescription>Your current fee payment status</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                  <span className="text-sm font-medium">Tuition Fee</span>
+                  <Badge variant="outline" className="text-green-600">Paid</Badge>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                  <span className="text-sm font-medium">Exam Fee</span>
+                  <Badge variant="outline" className="text-yellow-600">Due Oct 15</Badge>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <span className="text-sm font-medium">Library Fee</span>
+                  <Badge variant="outline" className="text-blue-600">Paid</Badge>
+                </div>
+                <div className="text-center pt-2">
+                  <span className="text-sm text-muted-foreground">Outstanding: </span>
+                  <span className="font-bold text-orange-600">₹2,500</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Important Dates</CardTitle>
+              <CardDescription>Upcoming events and deadlines</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 border rounded-lg">
+                  <Calendar className="w-5 h-5 text-blue-500" />
+                  <div>
+                    <p className="font-medium text-sm">Mid-term Exams</p>
+                    <p className="text-xs text-muted-foreground">Oct 15 - Oct 25</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 border rounded-lg">
+                  <FileText className="w-5 h-5 text-green-500" />
+                  <div>
+                    <p className="font-medium text-sm">Project Submission</p>
+                    <p className="text-xs text-muted-foreground">Oct 30</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 border rounded-lg">
+                  <CreditCard className="w-5 h-5 text-orange-500" />
+                  <div>
+                    <p className="font-medium text-sm">Fee Payment Due</p>
+                    <p className="text-xs text-muted-foreground">Nov 5</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

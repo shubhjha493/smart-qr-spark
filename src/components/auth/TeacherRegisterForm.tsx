@@ -27,7 +27,6 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
     password: '',
     mobileNumber: '',
     address: '',
-    aadharNumber: '',
     dateOfBirth: '',
     gradeLevel: '',
     subjects: [] as string[],
@@ -108,7 +107,6 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
               user_id: session.user.id,
               mobile_number: formData.mobileNumber,
               address: formData.address,
-              aadhar_number: formData.aadharNumber,
               date_of_birth: formData.dateOfBirth || null,
               grade_level: formData.gradeLevel,
               subjects: formData.subjects,
@@ -241,19 +239,6 @@ const TeacherRegisterForm: React.FC<TeacherRegisterFormProps> = ({ onClose }) =>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="aadharNumber">Aadhar Number</Label>
-          <div className="relative">
-            <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="aadharNumber"
-              placeholder="Enter Aadhar number"
-              value={formData.aadharNumber}
-              onChange={(e) => setFormData(prev => ({ ...prev, aadharNumber: e.target.value }))}
-              className="pl-10"
-            />
-          </div>
-        </div>
 
         <div className="space-y-2">
           <Label htmlFor="gradeLevel">Teacher of Grade</Label>

@@ -304,7 +304,7 @@ const AdminDashboard = () => {
 
         {/* Additional Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => toast({ title: "Payment Management", description: "Teacher salary and student fee management system coming soon!" })}>
             <CardHeader className="text-center">
               <CreditCard className="w-12 h-12 mx-auto text-green-500 mb-2" />
               <CardTitle>Payment Management</CardTitle>
@@ -312,9 +312,25 @@ const AdminDashboard = () => {
                 Manage teacher salaries and student fees
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Pending Salaries:</span>
+                  <span className="font-medium">₹45,000</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Fee Collection:</span>
+                  <span className="font-medium">₹2,48,000</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Outstanding:</span>
+                  <span className="font-medium text-red-500">₹32,000</span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => toast({ title: "Holiday Calendar", description: "Holiday management system coming soon!" })}>
             <CardHeader className="text-center">
               <Calendar className="w-12 h-12 mx-auto text-blue-500 mb-2" />
               <CardTitle>Holiday Calendar</CardTitle>
@@ -322,16 +338,48 @@ const AdminDashboard = () => {
                 Add and manage academic holidays
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>This Month:</span>
+                  <span className="font-medium">3 holidays</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Next Holiday:</span>
+                  <span className="font-medium">Oct 2nd</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Academic Days:</span>
+                  <span className="font-medium">22 days</span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => toast({ title: "Analytics Reports", description: "Detailed analytics dashboard coming soon!" })}>
             <CardHeader className="text-center">
               <UserCheck className="w-12 h-12 mx-auto text-purple-500 mb-2" />
-              <CardTitle>User Reports</CardTitle>
+              <CardTitle>Analytics Reports</CardTitle>
               <CardDescription>
-                View detailed user analytics
+                View detailed system analytics
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Avg Attendance:</span>
+                  <span className="font-medium">89.5%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Active Users:</span>
+                  <span className="font-medium">260</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>System Health:</span>
+                  <span className="font-medium text-green-500">Excellent</span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
 

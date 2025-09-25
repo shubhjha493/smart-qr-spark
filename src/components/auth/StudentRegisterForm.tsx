@@ -19,7 +19,6 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
     fatherName: '',
     motherName: '',
     dateOfBirth: '',
-    aadharNumber: '',
     class: '',
     rollNumber: '',
     section: '',
@@ -83,7 +82,6 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
               father_name: formData.fatherName,
               mother_name: formData.motherName,
               date_of_birth: formData.dateOfBirth || null,
-              aadhar_number: formData.aadharNumber,
               class: formData.class,
               roll_number: formData.rollNumber,
               section: formData.section,
@@ -209,19 +207,6 @@ const StudentRegisterForm: React.FC<StudentRegisterFormProps> = ({ onClose }) =>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="aadharNumber">Aadhar Number</Label>
-            <div className="relative">
-              <CreditCard className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="aadharNumber"
-                placeholder="Enter Aadhar number"
-                value={formData.aadharNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, aadharNumber: e.target.value }))}
-                className="pl-10"
-              />
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
