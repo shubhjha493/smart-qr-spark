@@ -18,7 +18,8 @@ import {
   CheckCircle,
   AlertCircle,
   PieChart,
-  Scan
+  Scan,
+  QrCode
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -79,6 +80,13 @@ const StudentDashboard = () => {
     toast({
       title: "Face Scan",
       description: "Face recognition attendance system coming soon!",
+    });
+  };
+
+  const qrScan = () => {
+    toast({
+      title: "QR Scan",
+      description: "QR code attendance system coming soon!",
     });
   };
 
@@ -170,7 +178,7 @@ const StudentDashboard = () => {
         </div>
 
         {/* Main Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={applyForLeave}>
             <CardHeader className="text-center">
               <FileText className="w-12 h-12 mx-auto text-blue-500 mb-2" />
@@ -197,6 +205,16 @@ const StudentDashboard = () => {
               <CardTitle>Pay Fees Online</CardTitle>
               <CardDescription>
                 Secure online fee payments
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={qrScan}>
+            <CardHeader className="text-center">
+              <QrCode className="w-12 h-12 mx-auto text-indigo-500 mb-2" />
+              <CardTitle>QR Scan</CardTitle>
+              <CardDescription>
+                Mark attendance with QR code
               </CardDescription>
             </CardHeader>
           </Card>
