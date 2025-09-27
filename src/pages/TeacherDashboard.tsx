@@ -70,14 +70,9 @@ const TeacherDashboard = () => {
 
   const markAttendance = () => {
     if (isOnlineMode) {
-      // Skip location check in online mode
+      // Skip location check in online mode - directly open camera
       handleCameraPreview();
     } else {
-      // Generate dummy location coordinates
-      const dummyLat = 40.7128 + (Math.random() - 0.5) * 0.01; // Near NYC coordinates with small variation
-      const dummyLng = -74.0060 + (Math.random() - 0.5) * 0.01;
-      setCurrentLocation({ lat: dummyLat, lng: dummyLng });
-      
       // Show location permission modal in offline mode
       setShowLocationModal(true);
     }
@@ -87,37 +82,59 @@ const TeacherDashboard = () => {
     setShowLocationModal(false);
     
     if (allowed) {
-      // Simulate location check with dummy school coordinates
-      const schoolLat = 40.7128;
-      const schoolLng = -74.0060;
-      const distance = Math.sqrt(
-        Math.pow(currentLocation.lat - schoolLat, 2) + 
-        Math.pow(currentLocation.lng - schoolLng, 2)
+      // Get real location using browser API
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const detectedLat = position.coords.latitude;
+          const detectedLng = position.coords.longitude;
+          setCurrentLocation({ lat: detectedLat, lng: detectedLng });
+          
+          // BIT Sindri coordinates
+          const schoolLat = 23.7957;
+          const schoolLng = 86.4304;
+          
+          // Calculate distance in kilometers
+          const R = 6371; // Earth's radius in km
+          const dLat = (detectedLat - schoolLat) * Math.PI / 180;
+          const dLng = (detectedLng - schoolLng) * Math.PI / 180;
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(schoolLat * Math.PI / 180) * Math.cos(detectedLat * Math.PI / 180) *
+                    Math.sin(dLng/2) * Math.sin(dLng/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = R * c; // Distance in km
+          
+          // If within 1km of school, consider it a match
+          const isLocationMatch = distance < 1;
+          setLocationMatched(isLocationMatch);
+          
+          if (isLocationMatch) {
+            toast({
+              title: "📍 Location matched with school premises",
+              description: "Opening camera preview...",
+            });
+            
+            setTimeout(() => {
+              handleCameraPreview();
+            }, 1500);
+          } else {
+            setShowLocationMismatch(true);
+            toast({
+              title: "⚠️ Not present at school location",
+              description: `Distance: ${distance.toFixed(2)}km from school. You must be within 1km of school premises.`,
+              variant: "destructive",
+            });
+          }
+        },
+        (error) => {
+          console.error('Location error:', error);
+          toast({
+            title: "Location Error",
+            description: "Unable to get your location. Please enable location services.",
+            variant: "destructive",
+          });
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
-      
-      // If within 0.005 degrees (~500m), consider it a match
-      const isLocationMatch = distance < 0.005;
-      setLocationMatched(isLocationMatch);
-      
-      if (isLocationMatch) {
-        // Show location matched animation
-        toast({
-          title: "📍 Location matched with school premises",
-          description: "Opening camera preview...",
-        });
-        
-        setTimeout(() => {
-          handleCameraPreview();
-        }, 1500);
-      } else {
-        // Show location mismatch with shake animation
-        setShowLocationMismatch(true);
-        toast({
-          title: "⚠️ Not present at school location",
-          description: "You must be on school premises to mark attendance.",
-          variant: "destructive",
-        });
-      }
     } else {
       toast({
         title: "Location Access Denied",
@@ -127,24 +144,47 @@ const TeacherDashboard = () => {
     }
   };
 
-  const handleCameraPreview = () => {
+  const handleCameraPreview = async () => {
     setShowCameraPreview(true);
     
-    // Auto-close camera after 2 seconds and show success
-    setTimeout(() => {
-      setShowCameraPreview(false);
+    try {
+      // Request real camera access
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       
-      // Success notification with animation
-      toast({
-        title: "✅ Attendance marked successfully",
-        description: "Your attendance has been recorded",
-      });
+      // Get video element and attach stream
+      const videoElement = document.getElementById('teacher-camera-video') as HTMLVideoElement;
+      if (videoElement) {
+        videoElement.srcObject = stream;
+        videoElement.play();
+      }
       
-      // Show post-attendance options
+      // Auto-close camera after 2 seconds and show success
       setTimeout(() => {
-        setShowPostAttendanceOptions(true);
-      }, 1000);
-    }, 2000);
+        // Stop camera stream
+        stream.getTracks().forEach(track => track.stop());
+        setShowCameraPreview(false);
+        
+        // Success notification with animation
+        toast({
+          title: "✅ Attendance marked successfully",
+          description: "Your attendance has been recorded",
+        });
+        
+        // Show post-attendance options
+        setTimeout(() => {
+          setShowPostAttendanceOptions(true);
+        }, 1000);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Camera error:', error);
+      setShowCameraPreview(false);
+      toast({
+        title: "Camera Access Denied",
+        description: "Camera access is required for attendance marking.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleStudentAttendanceChoice = (method: 'face' | 'qr') => {
@@ -523,9 +563,13 @@ const TeacherDashboard = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-8">
-            <div className="w-64 h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center animate-pulse shadow-lg">
-              <Camera className="w-12 h-12 text-white" />
-            </div>
+            <video 
+              id="teacher-camera-video"
+              className="w-64 h-48 bg-black rounded-lg object-cover"
+              autoPlay
+              muted
+              playsInline
+            />
           </div>
           
           {/* Display coordinates during camera preview */}

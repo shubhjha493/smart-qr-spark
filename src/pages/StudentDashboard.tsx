@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   BookOpen, 
   Calendar, 
@@ -19,7 +20,9 @@ import {
   AlertCircle,
   PieChart,
   Scan,
-  QrCode
+  QrCode,
+  MapPin,
+  Camera
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -29,6 +32,11 @@ const StudentDashboard = () => {
   const [notices, setNotices] = useState<any[]>([]);
   const [studentProfile, setStudentProfile] = useState<any>(null);
   const [enabledAttendanceMethod, setEnabledAttendanceMethod] = useState<'face' | 'qr' | null>(null);
+  const [isOnlineMode, setIsOnlineMode] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showCameraPreview, setShowCameraPreview] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
+  const [showLocationMismatch, setShowLocationMismatch] = useState(false);
 
   useEffect(() => {
     // Set dummy data
@@ -38,6 +46,10 @@ const StudentDashboard = () => {
     // Check teacher's choice for attendance method
     const attendanceMethod = localStorage.getItem('smartpresence_student_attendance_method') as 'face' | 'qr' | null;
     setEnabledAttendanceMethod(attendanceMethod);
+    
+    // Check admin mode setting
+    const adminMode = localStorage.getItem('smartpresence_admin_mode') || 'offline';
+    setIsOnlineMode(adminMode === 'online');
   }, []);
 
   // Dummy data for demo
@@ -81,31 +93,123 @@ const StudentDashboard = () => {
     });
   };
 
-  const faceScan = () => {
-    if (enabledAttendanceMethod === 'face') {
+  const markStudentAttendance = (method: 'face' | 'qr') => {
+    if (enabledAttendanceMethod !== method) {
       toast({
-        title: "✅ Attendance attempt recorded",
-        description: "Face recognition attendance recorded (Prototype only).",
+        title: `${method === 'face' ? 'Face' : 'QR'} Scan Disabled`,
+        description: "This attendance method is not currently enabled by your teacher.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    if (isOnlineMode) {
+      // Skip location check in online mode - directly open camera
+      handleCameraPreview(method);
+    } else {
+      // Show location permission modal in offline mode
+      setShowLocationModal(true);
+    }
+  };
+
+  const handleLocationPermission = (allowed: boolean) => {
+    setShowLocationModal(false);
+    
+    if (allowed) {
+      // Get real location using browser API
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const detectedLat = position.coords.latitude;
+          const detectedLng = position.coords.longitude;
+          setCurrentLocation({ lat: detectedLat, lng: detectedLng });
+          
+          // BIT Sindri coordinates
+          const schoolLat = 23.7957;
+          const schoolLng = 86.4304;
+          
+          // Calculate distance in kilometers
+          const R = 6371; // Earth's radius in km
+          const dLat = (detectedLat - schoolLat) * Math.PI / 180;
+          const dLng = (detectedLng - schoolLng) * Math.PI / 180;
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(schoolLat * Math.PI / 180) * Math.cos(detectedLat * Math.PI / 180) *
+                    Math.sin(dLng/2) * Math.sin(dLng/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = R * c; // Distance in km
+          
+          // If within 1km of school, consider it a match
+          const isLocationMatch = distance < 1;
+          
+          if (isLocationMatch) {
+            toast({
+              title: "📍 Location matched with school premises",
+              description: "Opening camera preview...",
+            });
+            
+            setTimeout(() => {
+              handleCameraPreview(enabledAttendanceMethod!);
+            }, 1500);
+          } else {
+            setShowLocationMismatch(true);
+            toast({
+              title: "⚠️ Not present at school location",
+              description: `Distance: ${distance.toFixed(2)}km from school. You must be within 1km of school premises.`,
+              variant: "destructive",
+            });
+          }
+        },
+        (error) => {
+          console.error('Location error:', error);
+          toast({
+            title: "Location Error",
+            description: "Unable to get your location. Please enable location services.",
+            variant: "destructive",
+          });
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
     } else {
       toast({
-        title: "Face Scan Disabled",
-        description: "This attendance method is not currently enabled by your teacher.",
+        title: "Location Access Denied",
+        description: "Location access is required for attendance marking.",
         variant: "destructive",
       });
     }
   };
 
-  const qrScan = () => {
-    if (enabledAttendanceMethod === 'qr') {
+  const handleCameraPreview = async (method: 'face' | 'qr') => {
+    setShowCameraPreview(true);
+    
+    try {
+      // Request real camera access
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      
+      // Get video element and attach stream
+      const videoElement = document.getElementById('student-camera-video') as HTMLVideoElement;
+      if (videoElement) {
+        videoElement.srcObject = stream;
+        videoElement.play();
+      }
+      
+      // Auto-close camera after 2 seconds and show success
+      setTimeout(() => {
+        // Stop camera stream
+        stream.getTracks().forEach(track => track.stop());
+        setShowCameraPreview(false);
+        
+        // Success notification
+        toast({
+          title: "✅ Attendance marked successfully",
+          description: `${method === 'face' ? 'Face recognition' : 'QR code'} attendance recorded.`,
+        });
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Camera error:', error);
+      setShowCameraPreview(false);
       toast({
-        title: "✅ Attendance attempt recorded",
-        description: "QR code attendance recorded (Prototype only).",
-      });
-    } else {
-      toast({
-        title: "QR Scan Disabled",
-        description: "This attendance method is not currently enabled by your teacher.",
+        title: "Camera Access Denied",
+        description: "Camera access is required for attendance marking.",
         variant: "destructive",
       });
     }
@@ -238,7 +342,7 @@ const StudentDashboard = () => {
                   ? 'hover:shadow-lg' 
                   : 'opacity-50 hover:shadow-sm'
             }`} 
-            onClick={qrScan}
+            onClick={() => markStudentAttendance('qr')}
           >
             <CardHeader className="text-center">
               <QrCode className={`w-12 h-12 mx-auto mb-2 ${
@@ -265,7 +369,7 @@ const StudentDashboard = () => {
                   ? 'hover:shadow-lg' 
                   : 'opacity-50 hover:shadow-sm'
             }`} 
-            onClick={faceScan}
+            onClick={() => markStudentAttendance('face')}
           >
             <CardHeader className="text-center">
               <Scan className={`w-12 h-12 mx-auto mb-2 ${
@@ -529,6 +633,111 @@ const StudentDashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Location Permission Modal */}
+      <Dialog open={showLocationModal} onOpenChange={setShowLocationModal}>
+        <DialogContent className="sm:max-w-md animate-scale-in">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              Location Access Required
+            </DialogTitle>
+            <DialogDescription>
+              To mark your attendance, we need to verify your location matches the school premises.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <div className="text-sm text-muted-foreground mb-2">Current Location:</div>
+            <div className="font-mono text-sm">
+              <div>Latitude: {currentLocation.lat.toFixed(6)}</div>
+              <div>Longitude: {currentLocation.lng.toFixed(6)}</div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => handleLocationPermission(false)}
+            >
+              Deny
+            </Button>
+            <Button 
+              onClick={() => handleLocationPermission(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Allow Location Access
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Location Mismatch Modal */}
+      <Dialog open={showLocationMismatch} onOpenChange={setShowLocationMismatch}>
+        <DialogContent className="sm:max-w-md animate-shake">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <MapPin className="w-5 h-5" />
+              ⚠️ Location Mismatch
+            </DialogTitle>
+            <DialogDescription>
+              You are not currently at the school premises. Please move to the school location to mark attendance.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+            <div className="text-sm text-destructive mb-2">Your Location:</div>
+            <div className="font-mono text-sm text-destructive">
+              <div>Latitude: {currentLocation.lat.toFixed(6)}</div>
+              <div>Longitude: {currentLocation.lng.toFixed(6)}</div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={() => setShowLocationMismatch(false)}
+              variant="outline"
+            >
+              Okay
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Camera Preview Modal */}
+      <Dialog open={showCameraPreview} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md animate-scale-in">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="w-5 h-5" />
+              Camera Preview
+            </DialogTitle>
+            <DialogDescription>
+              Please look at the camera for attendance verification.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-8">
+            <video 
+              id="student-camera-video"
+              className="w-64 h-48 bg-black rounded-lg object-cover"
+              autoPlay
+              muted
+              playsInline
+            />
+          </div>
+          
+          <div className="bg-muted/50 p-3 rounded-lg border text-center">
+            <div className="text-xs text-muted-foreground mb-1">Current Location</div>
+            <div className="font-mono text-xs">
+              {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+            </div>
+          </div>
+          
+          <div className="text-center text-sm text-muted-foreground">
+            {isOnlineMode ? "Online Mode Enabled – Location not required." : "Verifying your identity..."}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -38,7 +38,9 @@ const AdminDashboard = () => {
 
   // Dummy data - no API calls needed
   useEffect(() => {
-    // Set demo mode indicator
+    // Load saved mode from localStorage
+    const savedMode = localStorage.getItem('smartpresence_admin_mode') || 'offline';
+    setClassMode(savedMode as 'online' | 'offline');
   }, []);
 
   const handleModeToggle = (online: boolean) => {
