@@ -34,6 +34,9 @@ const TeacherDashboard = () => {
   const [showCameraPreview, setShowCameraPreview] = useState(false);
   const [showPostAttendanceOptions, setShowPostAttendanceOptions] = useState(false);
   const [isOnlineMode, setIsOnlineMode] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
+  const [locationMatched, setLocationMatched] = useState(false);
+  const [showLocationMismatch, setShowLocationMismatch] = useState(false);
 
   useEffect(() => {
     // Set dummy data
@@ -70,6 +73,11 @@ const TeacherDashboard = () => {
       // Skip location check in online mode
       handleCameraPreview();
     } else {
+      // Generate dummy location coordinates
+      const dummyLat = 40.7128 + (Math.random() - 0.5) * 0.01; // Near NYC coordinates with small variation
+      const dummyLng = -74.0060 + (Math.random() - 0.5) * 0.01;
+      setCurrentLocation({ lat: dummyLat, lng: dummyLng });
+      
       // Show location permission modal in offline mode
       setShowLocationModal(true);
     }
@@ -79,15 +87,37 @@ const TeacherDashboard = () => {
     setShowLocationModal(false);
     
     if (allowed) {
-      // Show location matched animation
-      toast({
-        title: "📍 Location matched with school premises",
-        description: "Opening camera preview...",
-      });
+      // Simulate location check with dummy school coordinates
+      const schoolLat = 40.7128;
+      const schoolLng = -74.0060;
+      const distance = Math.sqrt(
+        Math.pow(currentLocation.lat - schoolLat, 2) + 
+        Math.pow(currentLocation.lng - schoolLng, 2)
+      );
       
-      setTimeout(() => {
-        handleCameraPreview();
-      }, 1500);
+      // If within 0.005 degrees (~500m), consider it a match
+      const isLocationMatch = distance < 0.005;
+      setLocationMatched(isLocationMatch);
+      
+      if (isLocationMatch) {
+        // Show location matched animation
+        toast({
+          title: "📍 Location matched with school premises",
+          description: "Opening camera preview...",
+        });
+        
+        setTimeout(() => {
+          handleCameraPreview();
+        }, 1500);
+      } else {
+        // Show location mismatch with shake animation
+        setShowLocationMismatch(true);
+        toast({
+          title: "⚠️ Not present at school location",
+          description: "You must be on school premises to mark attendance.",
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Location Access Denied",
@@ -214,12 +244,12 @@ const TeacherDashboard = () => {
 
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={markAttendance}>
+          <Card className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300" onClick={markAttendance}>
             <CardHeader className="text-center">
-              <QrCode className="w-12 h-12 mx-auto text-blue-500 mb-2" />
-              <CardTitle>QR Attendance</CardTitle>
+              <CheckCircle className="w-12 h-12 mx-auto text-blue-500 mb-2" />
+              <CardTitle>Mark Attendance</CardTitle>
               <CardDescription>
-                Scan QR code to mark attendance quickly
+                Mark your own attendance for today
               </CardDescription>
             </CardHeader>
           </Card>
@@ -408,7 +438,7 @@ const TeacherDashboard = () => {
 
       {/* Location Permission Modal */}
       <Dialog open={showLocationModal} onOpenChange={setShowLocationModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md animate-scale-in">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5" />
@@ -418,6 +448,16 @@ const TeacherDashboard = () => {
               To mark your attendance, we need to verify your location matches the school premises.
             </DialogDescription>
           </DialogHeader>
+          
+          {/* Display dummy coordinates */}
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <div className="text-sm text-muted-foreground mb-2">Current Location:</div>
+            <div className="font-mono text-sm">
+              <div>Latitude: {currentLocation.lat.toFixed(6)}</div>
+              <div>Longitude: {currentLocation.lng.toFixed(6)}</div>
+            </div>
+          </div>
+          
           <div className="flex justify-end gap-3 pt-4">
             <Button 
               variant="outline" 
@@ -435,9 +475,44 @@ const TeacherDashboard = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Location Mismatch Modal */}
+      <Dialog open={showLocationMismatch} onOpenChange={setShowLocationMismatch}>
+        <DialogContent className="sm:max-w-md animate-shake">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <MapPin className="w-5 h-5" />
+              ⚠️ Location Mismatch
+            </DialogTitle>
+            <DialogDescription>
+              You are not currently at the school premises. Please move to the school location to mark attendance.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+            <div className="text-sm text-destructive mb-2">Your Location:</div>
+            <div className="font-mono text-sm text-destructive">
+              <div>Latitude: {currentLocation.lat.toFixed(6)}</div>
+              <div>Longitude: {currentLocation.lng.toFixed(6)}</div>
+            </div>
+            <div className="text-xs text-muted-foreground mt-2">
+              Distance from school: ~{Math.floor(Math.random() * 500 + 600)}m
+            </div>
+          </div>
+          
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={() => setShowLocationMismatch(false)}
+              variant="outline"
+            >
+              Okay
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Camera Preview Modal */}
       <Dialog open={showCameraPreview} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md animate-scale-in">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Camera className="w-5 h-5" />
@@ -448,10 +523,19 @@ const TeacherDashboard = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-8">
-            <div className="w-64 h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center animate-pulse">
+            <div className="w-64 h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center animate-pulse shadow-lg">
               <Camera className="w-12 h-12 text-white" />
             </div>
           </div>
+          
+          {/* Display coordinates during camera preview */}
+          <div className="bg-muted/50 p-3 rounded-lg border text-center">
+            <div className="text-xs text-muted-foreground mb-1">Current Location</div>
+            <div className="font-mono text-xs">
+              {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+            </div>
+          </div>
+          
           <div className="text-center text-sm text-muted-foreground">
             {isOnlineMode ? "Online Mode Enabled – Location not required." : "Verifying your identity..."}
           </div>
@@ -460,30 +544,46 @@ const TeacherDashboard = () => {
 
       {/* Post-Attendance Options Modal */}
       <Dialog open={showPostAttendanceOptions} onOpenChange={setShowPostAttendanceOptions}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg animate-slide-up">
           <DialogHeader>
             <DialogTitle>Enable Student Attendance</DialogTitle>
             <DialogDescription>
               Choose how students should mark their attendance today.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 pt-4">
-            <Button 
+          
+          <div className="grid grid-cols-1 gap-4 pt-4">
+            {/* Face Recognition Card */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 hover:border-primary/50" 
               onClick={() => handleStudentAttendanceChoice('face')}
-              className="w-full justify-start gap-3 h-12 animate-fade-in"
-              variant="outline"
             >
-              <Scan className="w-5 h-5 text-cyan-500" />
-              Mark Student Attendance via Face Recognition
-            </Button>
-            <Button 
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center mb-3">
+                  <Scan className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-lg">Face Recognition Attendance</CardTitle>
+                <CardDescription className="text-sm">
+                  Students will use facial recognition to mark their attendance. Fast and contactless.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            {/* QR Code Card */}
+            <Card 
+              className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 hover:border-primary/50" 
               onClick={() => handleStudentAttendanceChoice('qr')}
-              className="w-full justify-start gap-3 h-12 animate-fade-in"
-              variant="outline"
             >
-              <QrCode className="w-5 h-5 text-indigo-500" />
-              Mark Student Attendance via QR Code
-            </Button>
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mb-3">
+                  <QrCode className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-lg">QR Code Attendance</CardTitle>
+                <CardDescription className="text-sm">
+                  Students will scan a QR code to mark their attendance. Simple and reliable.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>
