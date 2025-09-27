@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   GraduationCap, 
   QrCode, 
@@ -16,7 +17,11 @@ import {
   Clock,
   Users,
   CheckCircle,
-  BookOpen
+  BookOpen,
+  MapPin,
+  Camera,
+  Scan,
+  Mic
 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
@@ -25,11 +30,19 @@ const TeacherDashboard = () => {
   const { toast } = useToast();
   const [notices, setNotices] = useState<any[]>([]);
   const [teacherProfile, setTeacherProfile] = useState<any>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showCameraPreview, setShowCameraPreview] = useState(false);
+  const [showPostAttendanceOptions, setShowPostAttendanceOptions] = useState(false);
+  const [isOnlineMode, setIsOnlineMode] = useState(false);
 
   useEffect(() => {
     // Set dummy data
     setNotices(dummyNotices);
     setTeacherProfile(dummyProfile);
+    
+    // Check admin mode setting
+    const adminMode = localStorage.getItem('smartpresence_admin_mode') || 'offline';
+    setIsOnlineMode(adminMode === 'online');
   }, []);
 
   // Dummy data for demo
@@ -53,9 +66,66 @@ const TeacherDashboard = () => {
   }, []);
 
   const markAttendance = () => {
+    if (isOnlineMode) {
+      // Skip location check in online mode
+      handleCameraPreview();
+    } else {
+      // Show location permission modal in offline mode
+      setShowLocationModal(true);
+    }
+  };
+
+  const handleLocationPermission = (allowed: boolean) => {
+    setShowLocationModal(false);
+    
+    if (allowed) {
+      // Show location matched animation
+      toast({
+        title: "📍 Location matched with school premises",
+        description: "Opening camera preview...",
+      });
+      
+      setTimeout(() => {
+        handleCameraPreview();
+      }, 1500);
+    } else {
+      toast({
+        title: "Location Access Denied",
+        description: "Location access is required for attendance marking.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCameraPreview = () => {
+    setShowCameraPreview(true);
+    
+    // Auto-close camera after 2 seconds and show success
+    setTimeout(() => {
+      setShowCameraPreview(false);
+      
+      // Success notification with animation
+      toast({
+        title: "✅ Attendance marked successfully",
+        description: "Your attendance has been recorded",
+      });
+      
+      // Show post-attendance options
+      setTimeout(() => {
+        setShowPostAttendanceOptions(true);
+      }, 1000);
+    }, 2000);
+  };
+
+  const handleStudentAttendanceChoice = (method: 'face' | 'qr') => {
+    setShowPostAttendanceOptions(false);
+    
+    // Store choice for student dashboard
+    localStorage.setItem('smartpresence_student_attendance_method', method);
+    
     toast({
-      title: "Attendance Feature",
-      description: "QR-based attendance marking will be available soon!",
+      title: "Student Attendance Method Set",
+      description: `${method === 'face' ? 'Face Recognition' : 'QR Code'} is now enabled in the Student Dashboard.`,
     });
   };
 
@@ -211,7 +281,7 @@ const TeacherDashboard = () => {
                       </p>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={markAttendance}>
                     Mark Attendance
                   </Button>
                 </div>
@@ -335,6 +405,88 @@ const TeacherDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Location Permission Modal */}
+      <Dialog open={showLocationModal} onOpenChange={setShowLocationModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              Location Access Required
+            </DialogTitle>
+            <DialogDescription>
+              To mark your attendance, we need to verify your location matches the school premises.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => handleLocationPermission(false)}
+            >
+              Deny
+            </Button>
+            <Button 
+              onClick={() => handleLocationPermission(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Allow Location Access
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Camera Preview Modal */}
+      <Dialog open={showCameraPreview} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="w-5 h-5" />
+              Camera Preview
+            </DialogTitle>
+            <DialogDescription>
+              Please look at the camera for attendance verification.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-8">
+            <div className="w-64 h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center animate-pulse">
+              <Camera className="w-12 h-12 text-white" />
+            </div>
+          </div>
+          <div className="text-center text-sm text-muted-foreground">
+            {isOnlineMode ? "Online Mode Enabled – Location not required." : "Verifying your identity..."}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Post-Attendance Options Modal */}
+      <Dialog open={showPostAttendanceOptions} onOpenChange={setShowPostAttendanceOptions}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enable Student Attendance</DialogTitle>
+            <DialogDescription>
+              Choose how students should mark their attendance today.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-4">
+            <Button 
+              onClick={() => handleStudentAttendanceChoice('face')}
+              className="w-full justify-start gap-3 h-12 animate-fade-in"
+              variant="outline"
+            >
+              <Scan className="w-5 h-5 text-cyan-500" />
+              Mark Student Attendance via Face Recognition
+            </Button>
+            <Button 
+              onClick={() => handleStudentAttendanceChoice('qr')}
+              className="w-full justify-start gap-3 h-12 animate-fade-in"
+              variant="outline"
+            >
+              <QrCode className="w-5 h-5 text-indigo-500" />
+              Mark Student Attendance via QR Code
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

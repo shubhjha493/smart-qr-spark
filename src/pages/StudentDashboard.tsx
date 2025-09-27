@@ -28,11 +28,16 @@ const StudentDashboard = () => {
   const { toast } = useToast();
   const [notices, setNotices] = useState<any[]>([]);
   const [studentProfile, setStudentProfile] = useState<any>(null);
+  const [enabledAttendanceMethod, setEnabledAttendanceMethod] = useState<'face' | 'qr' | null>(null);
 
   useEffect(() => {
     // Set dummy data
     setNotices(dummyNotices);
     setStudentProfile(dummyProfile);
+    
+    // Check teacher's choice for attendance method
+    const attendanceMethod = localStorage.getItem('smartpresence_student_attendance_method') as 'face' | 'qr' | null;
+    setEnabledAttendanceMethod(attendanceMethod);
   }, []);
 
   // Dummy data for demo
@@ -77,17 +82,33 @@ const StudentDashboard = () => {
   };
 
   const faceScan = () => {
-    toast({
-      title: "Face Scan",
-      description: "Face recognition attendance system coming soon!",
-    });
+    if (enabledAttendanceMethod === 'face') {
+      toast({
+        title: "✅ Attendance attempt recorded",
+        description: "Face recognition attendance recorded (Prototype only).",
+      });
+    } else {
+      toast({
+        title: "Face Scan Disabled",
+        description: "This attendance method is not currently enabled by your teacher.",
+        variant: "destructive",
+      });
+    }
   };
 
   const qrScan = () => {
-    toast({
-      title: "QR Scan",
-      description: "QR code attendance system coming soon!",
-    });
+    if (enabledAttendanceMethod === 'qr') {
+      toast({
+        title: "✅ Attendance attempt recorded",
+        description: "QR code attendance recorded (Prototype only).",
+      });
+    } else {
+      toast({
+        title: "QR Scan Disabled",
+        description: "This attendance method is not currently enabled by your teacher.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Mock data for today's classes
@@ -209,23 +230,57 @@ const StudentDashboard = () => {
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={qrScan}>
+          <Card 
+            className={`cursor-pointer transition-all duration-300 ${
+              enabledAttendanceMethod === 'qr' 
+                ? 'shadow-lg ring-2 ring-indigo-500 ring-opacity-50 animate-pulse' 
+                : enabledAttendanceMethod === null 
+                  ? 'hover:shadow-lg' 
+                  : 'opacity-50 hover:shadow-sm'
+            }`} 
+            onClick={qrScan}
+          >
             <CardHeader className="text-center">
-              <QrCode className="w-12 h-12 mx-auto text-indigo-500 mb-2" />
+              <QrCode className={`w-12 h-12 mx-auto mb-2 ${
+                enabledAttendanceMethod === 'qr' ? 'text-indigo-500' : 'text-gray-400'
+              }`} />
               <CardTitle>QR Scan</CardTitle>
               <CardDescription>
-                Mark attendance with QR code
+                {enabledAttendanceMethod === 'qr' 
+                  ? 'Active - Mark attendance with QR code' 
+                  : 'Mark attendance with QR code'
+                }
               </CardDescription>
+              {enabledAttendanceMethod === 'qr' && (
+                <Badge className="mt-2 bg-indigo-500">Active</Badge>
+              )}
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={faceScan}>
+          <Card 
+            className={`cursor-pointer transition-all duration-300 ${
+              enabledAttendanceMethod === 'face' 
+                ? 'shadow-lg ring-2 ring-cyan-500 ring-opacity-50 animate-pulse' 
+                : enabledAttendanceMethod === null 
+                  ? 'hover:shadow-lg' 
+                  : 'opacity-50 hover:shadow-sm'
+            }`} 
+            onClick={faceScan}
+          >
             <CardHeader className="text-center">
-              <Scan className="w-12 h-12 mx-auto text-cyan-500 mb-2" />
+              <Scan className={`w-12 h-12 mx-auto mb-2 ${
+                enabledAttendanceMethod === 'face' ? 'text-cyan-500' : 'text-gray-400'
+              }`} />
               <CardTitle>Face Scan</CardTitle>
               <CardDescription>
-                Mark attendance with face scan
+                {enabledAttendanceMethod === 'face' 
+                  ? 'Active - Mark attendance with face scan' 
+                  : 'Mark attendance with face scan'
+                }
               </CardDescription>
+              {enabledAttendanceMethod === 'face' && (
+                <Badge className="mt-2 bg-cyan-500">Active</Badge>
+              )}
             </CardHeader>
           </Card>
 

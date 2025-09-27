@@ -45,6 +45,9 @@ const AdminDashboard = () => {
     const newMode = online ? 'online' : 'offline';
     setClassMode(newMode);
     
+    // Store mode for teacher dashboard
+    localStorage.setItem('smartpresence_admin_mode', newMode);
+    
     toast({
       title: "Success",
       description: `Class mode switched to ${newMode}`,
@@ -222,12 +225,23 @@ const AdminDashboard = () => {
                 />
               </div>
               
-              <div className="p-4 bg-muted/50 rounded-lg">
+              <div className="p-4 bg-muted/50 rounded-lg animate-fade-in">
                 <p className="text-sm">
-                  <strong>Current Mode:</strong> <Badge variant="outline" className="ml-2 capitalize">{classMode}</Badge>
+                  <strong>Current Mode:</strong> 
+                  <Badge 
+                    variant="outline" 
+                    className={`ml-2 capitalize animate-scale-in ${
+                      classMode === 'online' ? 'text-green-600 border-green-200' : 'text-blue-600 border-blue-200'
+                    }`}
+                  >
+                    {classMode}
+                  </Badge>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  This setting affects attendance marking and class scheduling for all users.
+                  {classMode === 'online' 
+                    ? 'Teachers can mark attendance without location verification.' 
+                    : 'Teachers must verify location before marking attendance.'
+                  }
                 </p>
               </div>
             </CardContent>
